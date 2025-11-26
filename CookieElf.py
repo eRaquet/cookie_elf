@@ -24,18 +24,21 @@ COOKIES: list[str] = [
 class CookieElf:
     def om_nom_eat_them_cookies(self, cookies: list[str]) -> None:
         self.cookies: list[str] = cookies
-        self.plebians: set[str] = set(cookies)
+        self.plebians: dict[str, int] = dict({plebian : self.cookies.count(plebian) for plebian in set(cookies)})
+        self.plebians = dict(sorted(self.plebians.items()))  # sort the dict by those with the most cookies
 
     def dictate(self) -> dict[str, list[str]]:
-        decree: dict[str, list[str]] = {}
-        for plebian in self.plebians:
-            other_plebians = [other_plebian for other_plebian in self.cookies if other_plebian != plebian]
-            n_cookies = len(["Eateth not the cookies, or they will eateth your belt." for c in self.cookies if c == plebian])
-            for cookie in range(n_cookies):
-                decreed_plebian = other_plebians.pop(randint(0, len(other_plebians) - 1))
-                the_plebians_assignments = decree.get(plebian, [])
-                the_plebians_assignments.append(decreed_plebian)
-                decree[plebian] = the_plebians_assignments
+        decree: dict[str, list[str]] = {plebian : [] for plebian in self.plebians.keys()}
+        for plebian in self.plebians.keys():
+            n_cookies = self.plebians[plebian]
+            for cookie_eater in self.plebians.keys():
+                if n_cookies == 0:
+                    break
+                if cookie_eater != plebian:
+                    decree[cookie_eater].append(plebian)
+                    n_cookies -= 1
+            if n_cookies != 0:
+                raise RuntimeError("Not a valid cookie pattern!")
         return decree
     
 if __name__ == "__main__":
